@@ -1,0 +1,7 @@
+npm install recharts
+npm install react-select react-country-flag
+npm install styled-components
+npm install lodash
+npm install react-gauge-chart
+npm install mathjs
+
