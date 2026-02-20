@@ -1,9 +1,11 @@
 import { ArrowLeft, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Header from "../components/Header";
 
 export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Header />
       <div className="container mx-auto px-4 py-8">
         {/* Back Button */}
         <Link to="/">

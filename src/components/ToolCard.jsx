@@ -7,7 +7,6 @@ import { categoryColors } from '../data/toolsData';
 export default function ToolCard({ tool }) {
   const Icon = tool.icon;
   const colors = categoryColors[tool.category];
-  console.log('ToolCard route:', tool.route);
 
   return (
     <motion.div

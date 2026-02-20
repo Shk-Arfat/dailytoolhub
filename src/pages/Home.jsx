@@ -6,6 +6,7 @@ import CategoryFilter from '../components/CategoryFilter';
 import ToolCard from '../components/ToolCard';
 import { tools, categories } from '../data/toolsData';
 import { motion } from 'framer-motion';
+import { Helmet } from "react-helmet-async";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -25,7 +26,15 @@ export default function Home() {
     : categories.find(c => c.id === activeCategory)?.name;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <>
+      <Helmet>
+      <title>DailyTools Hub - 50+ Free Online Tools</title>
+      <meta
+        name="description"
+        content="DailyTools Hub offers 50+ free online tools including PDF tools, converters, calculators and productivity tools. No login required."
+      />
+      </Helmet>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
       
       <main className="container mx-auto px-4 py-8">
@@ -62,7 +71,7 @@ export default function Home() {
           </div>
 
           {/* Category Filter */}
-          <div className="overflow-x-auto pb-2">
+          <div className="overflow-x-auto pb-4">
             <div className="min-w-max px-2">
               <CategoryFilter
                 activeCategory={activeCategory}
@@ -171,6 +180,7 @@ export default function Home() {
       </main>
 
       <Footer />
-    </div>
+      </div>
+    </>
   );
 }

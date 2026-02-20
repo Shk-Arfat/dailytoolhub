@@ -27,7 +27,7 @@ export default function Footer() {
               Terms of Service
             </Link>
             <a
-              href="https://github.com/yourusername/dailytools-hub"
+              href="https://github.com/Shk-Arfat/dailytoolhub"
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-2"

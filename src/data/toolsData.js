@@ -366,6 +366,14 @@ export const tools = [
 
   // Text Tools
   {
+    id: 'typing-test',
+    name: 'Typing Test',
+    description: 'Test your typing skills',
+    category: 'text',
+    icon: Type,
+    route: '/tools/typing-test'
+  },
+  {
     id: 'word-counter',
     name: 'Word Counter',
     description: 'Count words and characters in text',
