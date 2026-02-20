@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Homepage -->
+  <url>
+    <loc>https://dailytoolshub.vercel.app/</loc>
+  </url>
+
+  <!-- File Tools -->
+  <url><loc>https://dailytoolshub.vercel.app/tools/pdf-to-word</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/word-to-pdf</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/image-to-pdf</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/merge-pdf</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/compress-pdf</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/remove-background</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/image-compressor</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/ocr</loc></url>
+
+  <!-- Converters -->
+  <url><loc>https://dailytoolshub.vercel.app/tools/currency-converter</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/length-converter</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/weight-converter</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/temperature-converter</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/timezone-converter</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/binary-converter</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/color-converter</loc></url>
+
+  <!-- Text Tools -->
+  <url><loc>https://dailytoolshub.vercel.app/tools/typing-test</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/word-counter</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/remove-duplicates</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/text-sorter</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/lorem-ipsum</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/speech-to-text</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/text-to-speech</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/text-case-converter</loc></url>
+
+  <!-- Web Tools -->
+  <url><loc>https://dailytoolshub.vercel.app/tools/json-formatter</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/base64-encoder</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/password-generator</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/uuid-generator</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/qr-generator</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/html-to-markdown</loc></url>
+
+  <!-- Calculators -->
+  <url><loc>https://dailytoolshub.vercel.app/tools/simple-calculator</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/scientific-calculator</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/age-calculator</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/bmi-calculator</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/emi-calculator</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/gst-calculator</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/discount-calculator</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/tip-calculator</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/salary-calculator</loc></url>
+
+  <!-- Productivity -->
+  <url><loc>https://dailytoolshub.vercel.app/tools/todo-list</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/habit-tracker</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/pomodoro-timer</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/notes-app</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/password-vault</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/random-number</loc></url>
+
+  <!-- Bonus -->
+  <url><loc>https://dailytoolshub.vercel.app/tools/resume-checker</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/instagram-caption</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/email-subject</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/color-palette</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/favicon-generator</loc></url>
+  <url><loc>https://dailytoolshub.vercel.app/tools/screenshot-pdf</loc></url>
+
+</urlset>
