@@ -6,11 +6,12 @@ import ToolLoader from './components/ToolLoader';
 import CategoryPage from './pages/CategoryPage';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
-
+import { Analytics } from "@vercel/analytics/react"
 
 function App() {
   return (
     <Router>
+      <Analytics />
       <AnimatePresence mode="wait">
         <Routes>
           <Route path="/" element={<Home />} />
