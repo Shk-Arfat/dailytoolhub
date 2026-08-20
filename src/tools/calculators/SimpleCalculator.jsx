@@ -87,12 +87,21 @@ const SimpleCalculator = () => {
 
               {/* Digital Display */}
               <div
-                className="
+                className={`
   bg-gradient-to-b from-green-200 to-green-400
-  text-gray-900 font-mono text-right text-5xl p-5 mb-8 rounded-xl tracking-wider
+  text-gray-900 font-mono text-right p-5 mb-8 rounded-xl tracking-wider
   shadow-[inset_0_4px_10px_rgba(0,0,0,0.4),_inset_0_-3px_6px_rgba(255,255,255,0.6)]
-  border border-green-300
-"
+  border border-green-300 overflow-x-auto whitespace-nowrap max-w-full break-all
+  ${
+    (input || "0").length > 14
+      ? "text-xl"
+      : (input || "0").length > 10
+      ? "text-2xl"
+      : (input || "0").length > 7
+      ? "text-3xl"
+      : "text-5xl"
+  }
+`}
               >
                 {input || "0"}
               </div>

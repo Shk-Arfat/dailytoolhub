@@ -68,23 +68,34 @@ const CurrencyConverter = () => {
 
   // convert currency
   const convert = async () => {
+    const numAmount = parseFloat(amount) || 0;
+    if (from === to) {
+      setResult(numAmount);
+      setCurrentRate(1);
+      return;
+    }
+    if (numAmount <= 0) return;
+
     try {
       const res = await fetch(
-        `${API}/latest?amount=${amount}&from=${from}&to=${to}`,
+        `${API}/latest?amount=${numAmount}&from=${from}&to=${to}`,
       );
+      if (!res.ok) return;
       const data = await res.json();
 
-      setResult(data.rates[to]);
-      setCurrentRate(data.rates[to] / amount);
+      if (data && data.rates && data.rates[to] !== undefined) {
+        setResult(data.rates[to]);
+        setCurrentRate(data.rates[to] / numAmount);
 
-      // format last updated time
-      const now = new Date();
-      setLastUpdated(
-        now.toLocaleString("en-US", {
-          dateStyle: "medium",
-          timeStyle: "short",
-        }),
-      );
+        // format last updated time
+        const now = new Date();
+        setLastUpdated(
+          now.toLocaleString("en-US", {
+            dateStyle: "medium",
+            timeStyle: "short",
+          }),
+        );
+      }
     } catch (err) {
       console.log("convert error", err);
     }
@@ -127,21 +138,64 @@ const CurrencyConverter = () => {
   }));
   const examples = [1, 5, 10, 25, 50, 100, 500, 1000, 5000, 10000];
 
-  // load currencies
+  // load currencies with fallback
   useEffect(() => {
     fetch(`${API}/currencies`)
-      .then((res) => res.json())
-      .then((data) => setCurrencies(Object.keys(data)));
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to load currencies");
+        return res.json();
+      })
+      .then((data) => setCurrencies(Object.keys(data)))
+      .catch((err) => {
+        console.log("Currencies API error, using fallback list:", err);
+        setCurrencies(Object.keys(currencyCountry));
+      });
   }, []);
 
   useEffect(() => {
     const fetchAllData = async () => {
+      const numAmount = parseFloat(amount) || 0;
+      const now = new Date();
+      const formattedTime = now.toLocaleString("en-US", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      });
+
+      if (from === to) {
+        setResult(numAmount);
+        setCurrentRate(1);
+        setLastUpdated(formattedTime);
+
+        const dummyHistory = [];
+        for (let i = 11; i >= 0; i--) {
+          const d = new Date();
+          d.setMonth(d.getMonth() - i);
+          dummyHistory.push({
+            date: d.toISOString().substring(0, 7),
+            rate: 1,
+          });
+        }
+        setHistory(dummyHistory);
+        return;
+      }
+
+      if (numAmount <= 0) {
+        return;
+      }
+
       try {
         // 1️⃣ Fetch latest conversion
         const latestRes = await fetch(
-          `${API}/latest?amount=${amount}&from=${from}&to=${to}`,
+          `${API}/latest?amount=${numAmount}&from=${from}&to=${to}`
         );
+        if (!latestRes.ok) throw new Error("Latest rate fetch failed");
         const latestData = await latestRes.json();
+
+        if (!latestData || !latestData.rates || latestData.rates[to] === undefined) {
+          throw new Error("Invalid rate returned");
+        }
+
+        const rate = latestData.rates[to];
 
         // 2️⃣ Fetch last year history
         const today = new Date();
@@ -152,28 +206,24 @@ const CurrencyConverter = () => {
         const start = lastYear.toISOString().split("T")[0];
 
         const historyRes = await fetch(
-          `${API}/${start}..${end}?from=${from}&to=${to}`,
+          `${API}/${start}..${end}?from=${from}&to=${to}`
         );
-        const historyData = await historyRes.json();
-
-        // 3️⃣ Prepare chart data
-        const chartData = Object.entries(historyData.rates).map(
-          ([date, value]) => ({
-            date: date.substring(0, 7),
-            rate: value[to],
-          }),
-        );
-
-        // 4️⃣ Prepare time string
-        const now = new Date();
-        const formattedTime = now.toLocaleString("en-US", {
-          dateStyle: "medium",
-          timeStyle: "short",
-        });
+        let chartData = [];
+        if (historyRes.ok) {
+          const historyData = await historyRes.json();
+          if (historyData && historyData.rates) {
+            chartData = Object.entries(historyData.rates).map(
+              ([date, value]) => ({
+                date: date.substring(0, 7),
+                rate: value[to],
+              })
+            );
+          }
+        }
 
         // ⭐ SINGLE STATE UPDATE BATCH
-        setResult(latestData.rates[to]);
-        setCurrentRate(latestData.rates[to] / amount);
+        setResult(rate);
+        setCurrentRate(rate / numAmount);
         setLastUpdated(formattedTime);
         setHistory(chartData);
       } catch (err) {
@@ -222,8 +272,16 @@ const CurrencyConverter = () => {
 
               {/* Dropdowns */}
               <div className="grid grid-cols-2 gap-4 text-gray-800 dark:text-gray-800">
-                <Select options={options} onChange={(e) => setFrom(e.value)} />
-                <Select options={options} onChange={(e) => setTo(e.value)} />
+                <Select
+                  options={options}
+                  value={options.find((o) => o.value === from)}
+                  onChange={(e) => e && setFrom(e.value)}
+                />
+                <Select
+                  options={options}
+                  value={options.find((o) => o.value === to)}
+                  onChange={(e) => e && setTo(e.value)}
+                />
               </div>
               <button
                 onClick={() => {
