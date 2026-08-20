@@ -101,32 +101,6 @@ const CurrencyConverter = () => {
     }
   };
 
-  // history chart data
-  // const fetchHistory = async () => {
-  //   try {
-  //     const today = new Date();
-  //     const lastYear = new Date();
-  //     lastYear.setFullYear(today.getFullYear() - 1);
-
-  //     const end = today.toISOString().split("T")[0];
-  //     const start = lastYear.toISOString().split("T")[0];
-
-  //     const res = await fetch(`${API}/${start}..${end}?from=${from}&to=${to}`);
-
-  //     const data = await res.json();
-
-  //     // Convert API object → chart array
-  //     const chartData = Object.entries(data.rates).map(([date, value]) => ({
-  //       date: date.substring(0, 7), // show YYYY-MM only
-  //       rate: value[to],
-  //     }));
-
-  //     setHistory(chartData);
-  //   } catch (err) {
-  //     console.log("History API error", err);
-  //   }
-  // };
-
   const options = currencies.map((c) => ({
     value: c,
     label: (
