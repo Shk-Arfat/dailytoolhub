@@ -65,41 +65,7 @@ const CurrencyConverter = () => {
   const [history, setHistory] = useState([]);
   const [lastUpdated, setLastUpdated] = useState("");
   const [currentRate, setCurrentRate] = useState(null);
-
-  // convert currency
-  const convert = async () => {
-    const numAmount = parseFloat(amount) || 0;
-    if (from === to) {
-      setResult(numAmount);
-      setCurrentRate(1);
-      return;
-    }
-    if (numAmount <= 0) return;
-
-    try {
-      const res = await fetch(
-        `${API}/latest?amount=${numAmount}&from=${from}&to=${to}`,
-      );
-      if (!res.ok) return;
-      const data = await res.json();
-
-      if (data && data.rates && data.rates[to] !== undefined) {
-        setResult(data.rates[to]);
-        setCurrentRate(data.rates[to] / numAmount);
-
-        // format last updated time
-        const now = new Date();
-        setLastUpdated(
-          now.toLocaleString("en-US", {
-            dateStyle: "medium",
-            timeStyle: "short",
-          }),
-        );
-      }
-    } catch (err) {
-      console.log("convert error", err);
-    }
-  };
+  const [isLoading, setIsLoading] = useState(false);
 
   const options = currencies.map((c) => ({
     value: c,
@@ -126,20 +92,31 @@ const CurrencyConverter = () => {
       });
   }, []);
 
-  useEffect(() => {
-    const fetchAllData = async () => {
-      const numAmount = parseFloat(amount) || 0;
-      const now = new Date();
-      const formattedTime = now.toLocaleString("en-US", {
-        dateStyle: "medium",
-        timeStyle: "short",
-      });
+  // Main conversion function
+  const performConversion = async () => {
+    const numAmount = parseFloat(amount) || 0;
+    
+    if (numAmount <= 0) {
+      setResult(null);
+      setCurrentRate(null);
+      return;
+    }
 
+    setIsLoading(true);
+
+    try {
+      // If same currency, return 1:1
       if (from === to) {
         setResult(numAmount);
         setCurrentRate(1);
-        setLastUpdated(formattedTime);
-
+        const now = new Date();
+        setLastUpdated(
+          now.toLocaleString("en-US", {
+            dateStyle: "medium",
+            timeStyle: "short",
+          })
+        );
+        // Generate dummy history for same currency
         const dummyHistory = [];
         for (let i = 11; i >= 0; i--) {
           const d = new Date();
@@ -150,62 +127,71 @@ const CurrencyConverter = () => {
           });
         }
         setHistory(dummyHistory);
+        setIsLoading(false);
         return;
       }
 
-      if (numAmount <= 0) {
-        return;
+      // Fetch latest conversion
+      const latestRes = await fetch(
+        `${API}/latest?amount=${numAmount}&from=${from}&to=${to}`
+      );
+      if (!latestRes.ok) throw new Error("Latest rate fetch failed");
+      const latestData = await latestRes.json();
+
+      if (!latestData || !latestData.rates || latestData.rates[to] === undefined) {
+        throw new Error("Invalid rate returned");
       }
 
-      try {
-        // 1️⃣ Fetch latest conversion
-        const latestRes = await fetch(
-          `${API}/latest?amount=${numAmount}&from=${from}&to=${to}`
-        );
-        if (!latestRes.ok) throw new Error("Latest rate fetch failed");
-        const latestData = await latestRes.json();
+      const rate = latestData.rates[to];
+      const calculatedRate = rate / numAmount;
 
-        if (!latestData || !latestData.rates || latestData.rates[to] === undefined) {
-          throw new Error("Invalid rate returned");
+      // Fetch last year history
+      const today = new Date();
+      const lastYear = new Date();
+      lastYear.setFullYear(today.getFullYear() - 1);
+
+      const end = today.toISOString().split("T")[0];
+      const start = lastYear.toISOString().split("T")[0];
+
+      const historyRes = await fetch(
+        `${API}/${start}..${end}?from=${from}&to=${to}`
+      );
+      let chartData = [];
+      if (historyRes.ok) {
+        const historyData = await historyRes.json();
+        if (historyData && historyData.rates) {
+          chartData = Object.entries(historyData.rates).map(
+            ([date, value]) => ({
+              date: date.substring(0, 7),
+              rate: value[to],
+            })
+          );
         }
-
-        const rate = latestData.rates[to];
-
-        // 2️⃣ Fetch last year history
-        const today = new Date();
-        const lastYear = new Date();
-        lastYear.setFullYear(today.getFullYear() - 1);
-
-        const end = today.toISOString().split("T")[0];
-        const start = lastYear.toISOString().split("T")[0];
-
-        const historyRes = await fetch(
-          `${API}/${start}..${end}?from=${from}&to=${to}`
-        );
-        let chartData = [];
-        if (historyRes.ok) {
-          const historyData = await historyRes.json();
-          if (historyData && historyData.rates) {
-            chartData = Object.entries(historyData.rates).map(
-              ([date, value]) => ({
-                date: date.substring(0, 7),
-                rate: value[to],
-              })
-            );
-          }
-        }
-
-        // ⭐ SINGLE STATE UPDATE BATCH
-        setResult(rate);
-        setCurrentRate(rate / numAmount);
-        setLastUpdated(formattedTime);
-        setHistory(chartData);
-      } catch (err) {
-        console.log("API error:", err);
       }
-    };
 
-    fetchAllData();
+      const now = new Date();
+      const formattedTime = now.toLocaleString("en-US", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      });
+
+      // Update all states
+      setResult(rate);
+      setCurrentRate(calculatedRate);
+      setLastUpdated(formattedTime);
+      setHistory(chartData);
+    } catch (err) {
+      console.log("Conversion error:", err);
+      setResult(null);
+      setCurrentRate(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Auto-convert when dependencies change
+  useEffect(() => {
+    performConversion();
   }, [from, to, amount]);
 
   return (
@@ -242,6 +228,8 @@ const CurrencyConverter = () => {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 className="w-full px-4 py-3 rounded-lg bg-white dark:bg-[#0F172A] border border-gray-300 dark:border-[#1F2937] text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+                min="0"
+                step="any"
               />
 
               {/* Dropdowns */}
@@ -250,13 +238,30 @@ const CurrencyConverter = () => {
                   options={options}
                   value={options.find((o) => o.value === from)}
                   onChange={(e) => e && setFrom(e.value)}
+                  classNamePrefix="react-select"
+                  styles={{
+                    control: (base) => ({
+                      ...base,
+                      backgroundColor: '#ffffff',
+                      borderColor: '#d1d5db',
+                    }),
+                  }}
                 />
                 <Select
                   options={options}
                   value={options.find((o) => o.value === to)}
                   onChange={(e) => e && setTo(e.value)}
+                  classNamePrefix="react-select"
+                  styles={{
+                    control: (base) => ({
+                      ...base,
+                      backgroundColor: '#ffffff',
+                      borderColor: '#d1d5db',
+                    }),
+                  }}
                 />
               </div>
+              
               <button
                 onClick={() => {
                   const temp = from;
@@ -269,18 +274,20 @@ const CurrencyConverter = () => {
               </button>
 
               <button
-                onClick={convert}
-                className="w-full mt-6 px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium transition"
+                onClick={performConversion}
+                disabled={isLoading}
+                className="w-full mt-6 px-6 py-3 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:bg-blue-400 text-white font-medium transition"
               >
-                Convert
+                {isLoading ? "Converting..." : "Convert"}
               </button>
 
-              {result && (
+              {result !== null && (
                 <h2 className="text-4xl font-bold text-center mt-6 text-gray-900 dark:text-white tracking-tight">
                   {amount} {from} = {result.toFixed(2)} {to}
                 </h2>
               )}
             </div>
+
             {/* Examples & History Chart */}
             <div className="grid md:grid-cols-2 gap-8 mt-14">
               {/* FROM → TO */}
@@ -289,13 +296,13 @@ const CurrencyConverter = () => {
                   Convert {from} to {to}
                 </h2>
 
-                {examples.map((v) => (
+                {result !== null && currentRate !== null && examples.map((v) => (
                   <div key={v} className="flex justify-between py-3 border-b border-gray-200 dark:border-[#1F2937]">
                     <span className="text-gray-900 dark:text-white font-medium">
                       {v} {from}
                     </span>
-                    <span>
-                      {(v * (result / amount)).toFixed(4)} {to}
+                    <span className="text-gray-700 dark:text-gray-300">
+                      {(v * currentRate).toFixed(4)} {to}
                     </span>
                   </div>
                 ))}
@@ -307,28 +314,29 @@ const CurrencyConverter = () => {
                   Convert {to} to {from}
                 </h2>
 
-                {examples.map((v) => (
+                {result !== null && currentRate !== null && currentRate > 0 && examples.map((v) => (
                   <div key={v} className="flex justify-between py-3 border-b border-gray-200 dark:border-[#1F2937]">
                     <span className="text-gray-900 dark:text-white font-medium">
                       {v} {to}
                     </span>
-                    <span>
-                      {(v / (result / amount)).toFixed(4)} {from}
+                    <span className="text-gray-700 dark:text-gray-300">
+                      {(v / currentRate).toFixed(4)} {from}
                     </span>
                   </div>
                 ))}
               </div>
             </div>
+
             {/* Exchange Rate Chart */}
             <div className="mt-16 bg-white dark:bg-[#111827] p-9 rounded-xl border border-gray-200 dark:border-[#1F2937]">
               {/* Current rate info */}
               <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                 <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                  1 {from} = {currentRate?.toFixed(4)} {to}
+                  1 {from} = {currentRate?.toFixed(4) || '...'} {to}
                 </p>
 
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Last updated: {lastUpdated}
+                  Last updated: {lastUpdated || 'Loading...'}
                 </p>
               </div>
 
@@ -338,7 +346,6 @@ const CurrencyConverter = () => {
 
               <ResponsiveContainer width="100%" height={320}>
                 <AreaChart data={history}>
-                  {/* Gradient */}
                   <defs>
                     <linearGradient
                       id="rateGradient"
@@ -356,9 +363,8 @@ const CurrencyConverter = () => {
                     </linearGradient>
                   </defs>
 
-                  {/* Grid lines */}
                   <CartesianGrid
-                    stroke="#E5E7EB" // gray-700
+                    stroke="#E5E7EB"
                     strokeDasharray="3 3"
                     opacity={0.3}
                     className="dark:stroke-[#1F2937]"
@@ -366,8 +372,8 @@ const CurrencyConverter = () => {
 
                   <XAxis
                     dataKey="date"
-                    tick={{ fill: "#6B7280", fontSize: 12 }} // gray-400
-                    axisLine={{ stroke: "#374151" }} // gray-700
+                    tick={{ fill: "#6B7280", fontSize: 12 }}
+                    axisLine={{ stroke: "#374151" }}
                     tickLine={{ stroke: "#374151" }}
                   />
 
@@ -380,15 +386,14 @@ const CurrencyConverter = () => {
 
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#111827", // gray-900
+                      backgroundColor: "#111827",
                       border: "1px solid #374151",
                       borderRadius: "10px",
-                      color: "#E5E7EB", // gray-200
+                      color: "#E5E7EB",
                     }}
                     labelStyle={{ color: "#9CA3AF" }}
                   />
 
-                  {/* Line + Gradient Fill */}
                   <Area
                     type="monotone"
                     dataKey="rate"
